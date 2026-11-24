@@ -4,7 +4,7 @@
 (() => {
   // collect.py의 CATEGORY_SLUGS와 반드시 일치해야 합니다
   const SLUG = {
-    "전체": "all", "AI": "ai", "뷰티": "beauty", "패션": "fashion",
+    "전체": "all", "AI": "ai", "레퍼런스": "ref", "뷰티": "beauty", "패션": "fashion",
     "라이프스타일": "lifestyle", "신혼부부": "newlywed",
   };
   const jsonResp = obj => Promise.resolve(
