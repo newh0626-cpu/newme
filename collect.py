@@ -94,6 +94,12 @@ def carry_forward(name, items_key, current):
             seed = json.load(f)
     except (OSError, json.JSONDecodeError):
         pass
+    # 지금 계정 목록에 없는 계정(원본 저장소의 기본 계정 등)의 글은 재사용하지 않습니다
+    wanted = {a.lower() for a in current.get("accounts") or []}
+    for cand in (prev, seed):
+        if wanted and cand and cand.get(items_key):
+            cand[items_key] = [it for it in cand[items_key]
+                               if (it.get("account") or "").lower() in wanted]
     best, label = None, ""
     for cand, lab in ((prev, "이전 스냅샷"), (seed, "시드")):
         if cand and cand.get(items_key) and \
