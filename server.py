@@ -36,18 +36,13 @@ IMG_CACHE_MAX = 600
 # ---------------------------------------------------------------- 유튜브
 # 카테고리 → 유튜브 검색어 매핑
 CATEGORIES = {
-    "먹방": "먹방",
-    "뷰티/패션": "뷰티 메이크업 패션",
-    "브이로그": "브이로그",
-    "예능/코미디": "예능 웃긴 영상",
-    "영화/드라마": "영화 드라마 리뷰",
-    "테크/IT": "테크 리뷰",
-    "지식/교육": "지식 교양",
-    "여행": "여행",
-    "동물": "강아지 고양이",
+    "뷰티": "뷰티 메이크업 화장품 추천",
+    "패션": "패션 코디 룩북",
+    "라이프스타일": "라이프스타일 일상 브이로그",
+    "신혼부부": "신혼부부 브이로그",
 }
 # "전체" 탭은 아래 카테고리들을 합쳐 조회수순으로 재정렬
-ALL_MERGE = ["먹방", "브이로그", "예능/코미디", "뷰티/패션", "영화/드라마", "여행"]
+ALL_MERGE = ["뷰티", "패션", "라이프스타일", "신혼부부"]
 
 # 검색 필터 protobuf: 업로드 날짜 (2=오늘, 3=이번 주, 4=이번 달)
 PERIOD_CODE = {"day": 2, "week": 3, "month": 4}
@@ -64,8 +59,12 @@ PERIOD_EXCLUDE = {
 IG_APP_ID = "936619743392459"  # instagram.com 웹이 쓰는 공개 앱 ID
 ACCOUNTS_FILE = os.path.join(BASE_DIR, "reels_accounts.json")
 DEFAULT_IG_ACCOUNTS = [
-    "openai", "runwayapp", "pika_labs", "lumalabsai", "midjourney",
-    "klingai_official", "heygen_official", "higgsfield.ai", "googledeepmind",
+    "y.hyein", "__jin___jin__", "pickle_lupita", "ev.alet", "bbeum.e",
+    "by_minzi", "_sihosiho", "blossomh_", "jissuuseo", "_diyom_",
+    "mean_ingless", "_een9", "ahsy_u", "gomsongyi", "onnuk_",
+    "bboyongnyong", "sunnychannel", "uuuuuuu_haru", "flow_yoon", "yunnnie",
+    "kisy0729", "nugayoung", "dadacafe__", "jelly_wony", "sosotmi",
+    "tabemacle", "yulri_0i", "kimehwa", "pu___reum",
 ]
 
 # ---------------------------------------------------------------- X (트위터)
