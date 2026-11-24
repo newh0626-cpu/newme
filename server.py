@@ -38,8 +38,8 @@ IMG_CACHE_MAX = 600
 CATEGORIES = {
     "레퍼런스": "",  # 아래 YT_CHANNELS의 최신 영상 (검색 아님)
     "뷰티": "뷰티 메이크업 화장품 추천",
-    "패션": "패션 코디 룩북",
-    "라이프스타일": "라이프스타일 일상 브이로그",
+    "패션": "코디 추천 하울",
+    "라이프스타일": "일상 브이로그",
     "신혼부부": "신혼부부 브이로그",
 }
 # "전체" 탭은 아래 카테고리들을 합쳐 조회수순으로 재정렬
@@ -58,6 +58,29 @@ YT_CHANNELS = [
     "ggominzi", "sunnyschannel", "yruirm", "gyuuujin", "ourdays",
 ]
 YT_CHANNEL_PERIOD_DAYS = {"day": 1, "week": 7, "month": 31}
+
+# 검색 결과에서 빼는 영상: 제목에 아래 단어가 있거나(대소문자 무시) 아래 채널이면 제외
+# (선정적인 '룩북', 가짜 라이브, AI 자동생성 리뷰 채널 등 — 이상한 게 보이면 여기에 추가)
+BLOCK_TITLE_WORDS = [
+    "스타킹", "란제리", "lingerie", "underwear", "언더웨어", "세로룩북", "직캠", "몸매",
+    "알바녀", "코스프레", "노출", "섹시", "sexy", "비키니", "bikini", "속옷", "겜방",
+    "페리스코프", "periscope", "라이브방송", "라이브 스트리밍", "라이브스트림", "#트젠",
+]
+BLOCK_CHANNELS = [
+    "쎄라겜방", "쎄라룩북", "清樂 TV", "ANGELS PERISCOPE", "Super Girls Periscope",
+    "Anna Daily", "TALAGA", "Kenzie Smith", "Nora Daily", "New Models Biography",
+    "SilAva", "Tiniban", "마리상단", "살림픽업", "쇼핑에이지", "리뷰월드컵", "실구매리포트",
+    "노래의 시간", "Donnice Dale's Livingspace", "ST Vlogger Ajay 및 Creator Binu",
+]
+
+
+def is_blocked(v) -> bool:
+    title = (v.get("title") or "").lower()
+    if any(w.lower() in title for w in BLOCK_TITLE_WORDS):
+        return True
+    if (v.get("channel") or "").strip() in BLOCK_CHANNELS:
+        return True
+    return (v.get("published") or "").startswith("스트리밍")  # 지난 라이브 방송 제외
 
 # 검색 필터 protobuf: 업로드 날짜 (2=오늘, 3=이번 주, 4=이번 달)
 PERIOD_CODE = {"day": 2, "week": 3, "month": 4}
@@ -224,7 +247,8 @@ def yt_search(query: str, period: str, shorts: bool):
     extract_videos(data, videos)
     seen, unique = set(), []
     for v in videos:
-        if v["id"] and v["id"] not in seen and within_period(v["published"], period):
+        if v["id"] and v["id"] not in seen and within_period(v["published"], period) \
+                and not is_blocked(v):
             seen.add(v["id"])
             unique.append(v)
     return unique
