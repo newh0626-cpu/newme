@@ -62,7 +62,7 @@
       "#updated{margin-left:auto}";
     document.head.appendChild(style);
     const badge = document.createElement("div");
-    badge.textContent = "⏱ 1시간마다 자동 수집되는 스냅샷입니다";
+    badge.textContent = "⏱ 매일 아침 8시 자동 수집되는 스냅샷입니다";
     badge.style.cssText = "color:var(--muted);font-size:12px";
     document.getElementById("updated").after(badge);
   });
