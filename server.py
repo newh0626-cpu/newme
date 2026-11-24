@@ -36,6 +36,7 @@ IMG_CACHE_MAX = 600
 # ---------------------------------------------------------------- 유튜브
 # 카테고리 → 유튜브 검색어 매핑
 CATEGORIES = {
+    "레퍼런스": "",  # 아래 YT_CHANNELS의 최신 영상 (검색 아님)
     "뷰티": "뷰티 메이크업 화장품 추천",
     "패션": "패션 코디 룩북",
     "라이프스타일": "라이프스타일 일상 브이로그",
@@ -43,6 +44,19 @@ CATEGORIES = {
 }
 # "전체" 탭은 아래 카테고리들을 합쳐 조회수순으로 재정렬
 ALL_MERGE = ["뷰티", "패션", "라이프스타일", "신혼부부"]
+
+# "레퍼런스" 카테고리에서 최신 영상을 모아 볼 유튜브 채널 핸들(@ 없이)
+YT_CHANNELS = [
+    "in_bora_", "LeeyullArt", "choimona", "evalet", "DoubleSoup",
+    "jissuuseo", "지안씨_jianssi", "P1_ease", "yyyyyyyyyyhk", "JJeongU",
+    "song_e_song_e", "juminii", "aloha9115", "HEYNEE103", "Buddle_u",
+    "haesulook", "bbeume", "2byeolmii", "_lupita____", "ocean_beauty",
+    "yulriyulri", "challenzyu", "happyhabits_s", "siyumme", "Azul.3",
+    "fromAngela", "chajeehye", "minsco_", "HYOMINKOO", "데이DAY",
+    "hyunj1nnnn", "een9", "turtle_jumi", "hyeimoo", "hyunseoroom",
+    "이손eson", "zihyunseo", "me_wooo", "mlnlng_",
+]
+YT_CHANNEL_PERIOD_DAYS = {"day": 1, "week": 7, "month": 31}
 
 # 검색 필터 protobuf: 업로드 날짜 (2=오늘, 3=이번 주, 4=이번 달)
 PERIOD_CODE = {"day": 2, "week": 3, "month": 4}
@@ -254,8 +268,106 @@ def merge_yt_searches(queries, period, shorts):
     return merged
 
 
+_yt_channel_ids = {}
+
+
+def yt_channel_id(handle: str):
+    """@핸들 → UC로 시작하는 채널 ID (채널 페이지 HTML에서 추출, 프로세스 안에서 캐시)"""
+    if handle in _yt_channel_ids:
+        return _yt_channel_ids[handle]
+    cid = None
+    try:
+        _, body = http_get("https://www.youtube.com/@" + quote(handle), timeout=15,
+                           headers={"Accept-Language": "ko-KR,ko;q=0.9"})
+        page = body.decode("utf-8", "ignore")
+        m = (re.search(r'<link rel="canonical" href="https://www\.youtube\.com/channel/(UC[\w-]{22})"', page)
+             or re.search(r'"externalId":"(UC[\w-]{22})"', page)
+             or re.search(r'"browseId":"(UC[\w-]{22})"', page))
+        cid = m.group(1) if m else None
+    except Exception:
+        pass
+    _yt_channel_ids[handle] = cid
+    return cid
+
+
+def _ago_text(ts: int) -> str:
+    """경과 시간을 유튜브식 한국어('N일 전')로 바꿉니다 (within_period 필터와 같은 표현)."""
+    sec = max(0, time.time() - ts)
+    if sec < 3600:
+        return "%d분 전" % max(1, sec // 60)
+    if sec < 86400:
+        return "%d시간 전" % (sec // 3600)
+    if sec < 86400 * 7:
+        return "%d일 전" % (sec // 86400)
+    if sec < 86400 * 30:
+        return "%d주 전" % (sec // (86400 * 7))
+    if sec < 86400 * 365:
+        return "%d개월 전" % (sec // (86400 * 30))
+    return "%d년 전" % (sec // (86400 * 365))
+
+
+def fetch_channel_feed(handle: str):
+    """채널 RSS(최근 영상 15개)에서 제목·조회수·썸네일·게시일·쇼츠 여부를 가져옵니다."""
+    cid = yt_channel_id(handle)
+    if not cid:
+        return []
+    try:
+        _, body = http_get("https://www.youtube.com/feeds/videos.xml?channel_id=" + cid, timeout=15)
+        root = ET.fromstring(body)
+    except Exception:
+        return []
+    A = "{http://www.w3.org/2005/Atom}"
+    YT = "{http://www.youtube.com/xml/schemas/2015}"
+    MD = "{http://search.yahoo.com/mrss/}"
+    out = []
+    for e in root.iter(A + "entry"):
+        vid = e.findtext(YT + "videoId") or ""
+        link = e.find(A + "link")
+        href = link.get("href", "") if link is not None else ""
+        pub = e.findtext(A + "published") or ""
+        try:
+            ts = int(datetime.datetime.fromisoformat(pub.replace("Z", "+00:00")).timestamp())
+        except ValueError:
+            ts = 0
+        grp = e.find(MD + "group")
+        stats = grp.find(MD + "community/" + MD + "statistics") if grp is not None else None
+        thumb = grp.find(MD + "thumbnail") if grp is not None else None
+        out.append({
+            "id": vid,
+            "title": e.findtext(A + "title") or "",
+            "channel": e.findtext(A + "author/" + A + "name") or handle,
+            "views": int(stats.get("views", 0)) if stats is not None else 0,
+            "viewsText": "",
+            "length": "",
+            "published": _ago_text(ts) if ts else "",
+            "publishedAt": ts,
+            "thumbnail": "https://i.ytimg.com/vi/%s/hqdefault.jpg" % vid if vid else
+                         (thumb.get("url", "") if thumb is not None else ""),
+            "isShort": "/shorts/" in href,
+        })
+    return out
+
+
+def get_channel_videos(period: str, shorts: bool, force: bool = False):
+    def fetch_all():
+        with ThreadPoolExecutor(max_workers=6) as pool:
+            results = pool.map(fetch_channel_feed, YT_CHANNELS)
+        return [v for chunk in results for v in chunk]
+    allv, _ = cached(("ytch", tuple(YT_CHANNELS)), force, fetch_all)
+    cutoff = time.time() - YT_CHANNEL_PERIOD_DAYS.get(period, 7) * 86400
+    vids = [dict(v) for v in allv
+            if v["publishedAt"] >= cutoff and v["isShort"] == bool(shorts)]
+    vids.sort(key=lambda v: v["views"], reverse=True)
+    return vids
+
+
 def get_videos(category: str, period: str, shorts: bool, force: bool, enrich: bool = False, query: str = ""):
     def fetch():
+        if not query and category == "레퍼런스":
+            vids = get_channel_videos(period, shorts, force)
+            if enrich:
+                enrich_likes(vids)
+            return vids
         if query:
             queries = [query]
         elif category == "전체":
