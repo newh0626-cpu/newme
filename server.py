@@ -55,6 +55,7 @@ YT_CHANNELS = [
     "fromAngela", "chajeehye", "minsco_", "HYOMINKOO", "데이DAY",
     "hyunj1nnnn", "een9", "turtle_jumi", "hyeimoo", "hyunseoroom",
     "이손eson", "zihyunseo", "me_wooo", "mlnlng_",
+    "ggominzi", "sunnyschannel", "yruirm", "gyuuujin", "ourdays",
 ]
 YT_CHANNEL_PERIOD_DAYS = {"day": 1, "week": 7, "month": 31}
 
