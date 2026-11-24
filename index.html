@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>데일리 트렌드 뷰어</title>
+<title>@hinew.me 트렌드 뷰어</title>
 <style>
   :root {
     --bg: #0f1115; --panel: #171a21; --card: #1c2029; --border: #2a2f3a;
-    --text: #e8eaf0; --muted: #9aa3b2; --accent: #ff4d6d; --accent2: #4d9fff;
+    --text: #e8eaf0; --muted: #9aa3b2; --accent: #89CFF0; --on-accent: #0f1b2d; --accent2: #4d9fff;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: var(--bg); color: var(--text); font-family: -apple-system, "Apple SD Gothic Neo", "Pretendard", sans-serif; }
@@ -18,7 +18,7 @@
   #searchForm { margin-left: auto; display: flex; gap: 6px; }
   #searchInput { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 8px 13px; color: var(--text); font-size: 13px; width: 230px; }
   #searchInput:focus { outline: none; border-color: var(--accent2); }
-  #searchBtn { background: var(--accent); border: none; color: #fff; border-radius: 8px; padding: 8px 14px; font-size: 13px; font-weight: 700; cursor: pointer; }
+  #searchBtn { background: var(--accent); border: none; color: var(--on-accent); border-radius: 8px; padding: 8px 14px; font-size: 13px; font-weight: 700; cursor: pointer; }
   #refreshBtn { background: var(--panel); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; font-size: 13px; cursor: pointer; }
   #refreshBtn:hover { border-color: var(--accent2); }
   #updated { color: var(--muted); font-size: 12px; }
@@ -29,7 +29,7 @@
   .toolbar { background: var(--panel); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 12px 24px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
   .chips { display: flex; gap: 6px; flex-wrap: wrap; }
   .chip { padding: 6px 13px; border-radius: 999px; background: var(--card); border: 1px solid var(--border); color: var(--muted); font-size: 13px; cursor: pointer; white-space: nowrap; }
-  .chip.active { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; }
+  .chip.active { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 700; }
   .periods { display: flex; gap: 4px; margin-left: auto; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 3px; }
   .period { padding: 5px 12px; border-radius: 8px; background: transparent; border: none; color: var(--muted); font-size: 13px; cursor: pointer; }
   .period.active { background: var(--accent2); color: #fff; font-weight: 700; }
@@ -42,7 +42,7 @@
   .thumb { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; background: #000; }
   .grid.shorts .thumb { aspect-ratio: 9/13; }
   .rank { position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,.75); color: #ffd166; font-weight: 800; font-size: 13px; padding: 3px 9px; border-radius: 7px; }
-  .rank.top { background: var(--accent); color: #fff; }
+  .rank.top { background: var(--accent); color: var(--on-accent); }
   .len { position: absolute; right: 8px; background: rgba(0,0,0,.8); color: #fff; font-size: 11px; padding: 2px 6px; border-radius: 5px; }
   .meta { padding: 10px 12px 12px; }
   .title { font-size: 13.5px; font-weight: 600; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 36px; }
@@ -73,13 +73,13 @@
   .modelcard .mid { font-size: 13px; font-weight: 700; word-break: break-all; line-height: 1.35; }
   .modelcard .msub { margin-top: 7px; display: flex; gap: 8px; align-items: center; font-size: 11.5px; color: var(--muted); flex-wrap: wrap; }
   .pill { border-radius: 999px; padding: 2px 8px; font-size: 10.5px; font-weight: 700; }
-  .pill.t2v { background: rgba(255,77,109,.16); color: var(--accent); }
+  .pill.t2v { background: rgba(137,207,240,.16); color: var(--accent); }
   .pill.i2v { background: rgba(77,159,255,.16); color: var(--accent2); }
   .newslist { display: flex; flex-direction: column; gap: 6px; }
   .newsitem { display: flex; gap: 10px; align-items: baseline; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; text-decoration: none; color: var(--text); }
   .newsitem:hover { border-color: var(--accent); }
   .newsitem .badge { flex-shrink: 0; font-size: 10.5px; font-weight: 700; border-radius: 6px; padding: 2px 7px; }
-  .badge.kr { background: rgba(255,77,109,.16); color: var(--accent); }
+  .badge.kr { background: rgba(137,207,240,.16); color: var(--accent); }
   .badge.gl { background: rgba(77,159,255,.16); color: var(--accent2); }
   .newsitem .ntitle { font-size: 13.5px; line-height: 1.4; flex: 1; }
   .newsitem .nsrc { flex-shrink: 0; color: var(--muted); font-size: 12px; }
@@ -112,7 +112,7 @@
   .postcard:hover { border-color: var(--accent2); transform: translateY(-2px); }
   .postcard .phead { display: flex; align-items: center; gap: 8px; margin-bottom: 9px; }
   .postcard .prank { background: var(--panel); color: #ffd166; font-weight: 800; font-size: 12px; padding: 2px 9px; border-radius: 7px; }
-  .postcard .prank.top { background: var(--accent); color: #fff; }
+  .postcard .prank.top { background: var(--accent); color: var(--on-accent); }
   .postcard .pacct { font-size: 13px; font-weight: 700; }
   .postcard .pacct small { color: var(--muted); font-weight: 400; margin-left: 3px; }
   .postcard .ptext { font-size: 14px; line-height: 1.5; white-space: pre-wrap; word-break: break-word; display: -webkit-box; -webkit-line-clamp: 6; -webkit-box-orient: vertical; overflow: hidden; }
@@ -134,7 +134,7 @@
 </head>
 <body>
 <header>
-  <h1>데일리 <span>트렌드</span> 뷰어</h1>
+  <h1>@hinew.me <span>트렌드</span> 뷰어</h1>
   <div id="today"></div>
   <form id="searchForm">
     <input id="searchInput" type="search" placeholder="유튜브 검색어 입력 (예: AI 광고)">
