@@ -24,9 +24,8 @@ PAGES_BASE = os.environ.get("PAGES_BASE", "https://lmorejh.github.io/daily-trend
 
 # static_shim.js의 SLUG와 반드시 일치해야 합니다 (파일명에 쓸 영문 슬러그)
 CATEGORY_SLUGS = {
-    "전체": "all", "AI": "ai", "먹방": "mukbang", "뷰티/패션": "beauty",
-    "브이로그": "vlog", "예능/코미디": "fun", "영화/드라마": "movie",
-    "테크/IT": "tech", "지식/교육": "edu", "여행": "travel", "동물": "animal",
+    "전체": "all", "AI": "ai", "뷰티": "beauty", "패션": "fashion",
+    "라이프스타일": "lifestyle", "신혼부부": "newlywed",
 }
 
 
